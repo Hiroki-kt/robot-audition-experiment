@@ -23,7 +23,7 @@ class StateMachine(object):
         self.rfnc = RecodeFunc()
         self.mic_index, self.mic_channels = self.rfnc.get_index('ReSpeaker 4 Mic Array (UAC1.0) ')
         # self.speak_wf, self.speak_stream, self.speak_p = self.rfnc.sound_read("./origin_sound_data/tsp_1num.wav")
-        self.speak_path = "../origin_sound_data/up_tsp_8num.wav"
+        self.speak_path = "../_exp/Speaker_Sound/2_up_tsp_8num.wav"
         self.mic_path = '../_exp/19' + datetime.today().strftime("%m%d") + '/recode_data/' + \
                         datetime.today().strftime("%H%M%S") + "/"
         self.adjust = 50
@@ -68,6 +68,7 @@ def check_ready(wait_count):
 if __name__ == '__main__':
     st = StateMachine("State")
     order = [50, 40, 30, 20, 10, 0, -10, -20, -30, -40]
+    # order = [0]
     DIRECTIONS = [order]
     for i in range(10):
         order = [k - 1 for k in order]
@@ -76,6 +77,7 @@ if __name__ == '__main__':
     # print(np.array(DIRECTIONS).reshape(1, -1)[0])
     st.Init_set()
     check_ready(200)
+    time.sleep(30)
     print("Finish Calibration of Turn Table")
     print("#################################################")
     st.Turn_start(DIRECTIONS[0] + st.adjust)
@@ -87,3 +89,5 @@ if __name__ == '__main__':
         print("******************************************")
         if i + 1 < len(DIRECTIONS):
             st.Turn_res(DIRECTIONS[i + 1] + st.adjust)
+
+    st.scon.move_table(0 + st.adjust)

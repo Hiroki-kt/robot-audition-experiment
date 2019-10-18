@@ -15,9 +15,13 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="ProjectId" id="1R0KuZERmI1YxIt0Jjwu6qcL8AO" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Program" />
     <property name="run.code.analysis.last.selected.profile" value="aDefault" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
@@ -33,7 +37,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.test_pyaudio">
+  <component name="RunManager" selected="Python.main_exp_system">
     <configuration name="_recode_func" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="stage" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -170,10 +174,10 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.test_pyaudio" />
         <item itemvalue="Python.main_exp_system" />
-        <item itemvalue="Python._recode_func" />
         <item itemvalue="Python._sound_recoder" />
+        <item itemvalue="Python.test_pyaudio" />
+        <item itemvalue="Python._recode_func" />
         <item itemvalue="Python.key_evnt_test" />
       </list>
     </recent_temporary>
@@ -190,5 +194,18 @@
       <updated>1568798796650</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
