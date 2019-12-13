@@ -83,6 +83,11 @@ class RecodeFunc:
         stream.stop_stream()
         stream.close()
         p.terminate()
+        print("Speaker Finish")
+
+    def sound_play_recode(self, file_name, chunk):
+        wf, stream, p = self.sound_read(file_name)
+        data = wf.readframes(chunk)
 
 
 if __name__ == '__main__':

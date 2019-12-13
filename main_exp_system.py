@@ -103,12 +103,12 @@ class StateMachine(object):
 
 if __name__ == '__main__':
     st = StateMachine("State")
-    repeat_num = 10
+    # repeat_num = 10
     order = [50, 40, 30, 20, 10, 0, -10, -20, -30, -40]
     # order = [10, 0]
     DIRECTIONS = st.make_dir(order)
     # print(np.array(DIRECTIONS).reshape(1, -1)[0])
-    for i in range(repeat_num):
-        st.main(DIRECTIONS, num=i+1)
+    # for i in range(repeat_num):
+    st.main(DIRECTIONS)
 
 
