@@ -3,6 +3,8 @@ import pyaudio
 import wave
 import sys
 import os
+import numpy as np
+from _function import MyFunc
 # from msvcrt import getch  # Windowsでは使えるらしい
 
 
@@ -88,6 +90,62 @@ class RecodeFunc:
     def sound_play_recode(self, file_name, chunk):
         wf, stream, p = self.sound_read(file_name)
         data = wf.readframes(chunk)
+
+    def play_rec(self, out_file_name, recode_second, device_name='ReSpeaker 4 Mic Array (UAC1.0)',
+                 CHUNK=1024, input_file_name='./test_out.wav', need_data=False):
+        # file_name = '../_exp/Speaker_Sound/up_tsp_1num.wav'
+        wf = wave.open(out_file_name, 'rb')
+        sampling = wf.getframerate()
+        index, channels = self.get_index(device_name)
+        p = pyaudio.PyAudio()
+
+        stream1 = p.open(format=pyaudio.paInt16,
+                         channels=channels,
+                         rate=sampling,
+                         frames_per_buffer=CHUNK,
+                         input=True,
+                         input_device_index=index,
+                         )
+
+        stream2 = p.open(format=pyaudio.paInt16,
+                         channels=1,
+                         rate=sampling,
+                         frames_per_buffer=CHUNK,
+                         output=True
+                         )
+
+        if sampling * recode_second < wf.getnframes():
+            print('Error recode time is not enough')
+            sys.exit()
+
+        elif sampling * recode_second > wf.getnframes() * 2:
+            print('Error recode time is too long')
+            sys.exit()
+
+        else:
+            out_data = wf.readframes(CHUNK)
+            in_data = stream1.read(CHUNK)
+            recoding_data = [in_data]
+            for i in range(0, int(sampling / CHUNK * recode_second)):
+                input_data = stream1.read(CHUNK)
+                recoding_data.append(input_data)
+                if out_data != b'':
+                    stream2.write(out_data)
+                    out_data = wf.readframes(CHUNK)
+            recoded_data = b''.join(recoding_data)
+            print(type(recoded_data))
+            self.wave_save(recoded_data, channels=channels, sampling=sampling, wave_file=input_file_name)
+
+            stream1.stop_stream()
+            stream2.stop_stream()
+            stream1.close()
+            stream2.close()
+            p.terminate()
+            if need_data:
+                print('use data return data', np.frombuffer(np.array(recoding_data), dtype='int16').shape)
+                recoded_input_data = np.array(np.frombuffer(np.array(recoding_data), dtype='int16'))\
+                    .reshape((channels, -1), order='F')
+                return recoded_input_data, sampling
 
 
 if __name__ == '__main__':
