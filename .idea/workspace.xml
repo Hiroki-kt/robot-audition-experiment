@@ -197,12 +197,12 @@
       <option name="MODULE_MODE" value="false" />
     </configuration>
     <list>
-      <item itemvalue="Python.turntable_controler" />
-      <item itemvalue="Python.test_pyaudio" />
       <item itemvalue="Python._sound_recoder" />
+      <item itemvalue="Python.main_estimate_azimuth_" />
       <item itemvalue="Python.main_exp_system" />
       <item itemvalue="Python.pconcb" />
-      <item itemvalue="Python.main_estimate_azimuth_" />
+      <item itemvalue="Python.test_pyaudio" />
+      <item itemvalue="Python.turntable_controler" />
     </list>
     <recent_temporary>
       <list>
