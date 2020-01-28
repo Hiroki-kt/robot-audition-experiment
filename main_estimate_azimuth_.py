@@ -5,6 +5,8 @@ import joblib
 from matplotlib import pyplot as plt
 import numpy as np
 from scipy import stats
+from _turntable_controler import StageControl
+import time
 
 
 class Estimate(RecodeFunc):
@@ -12,7 +14,7 @@ class Estimate(RecodeFunc):
         self.mic_path = '../_exp/19' + datetime.today().strftime("%m%d") + '/recode_data/' + \
                         datetime.today().strftime("%H%M%S") + '/'
         self.my_makedirs(self.mic_path)
-        self.mic_index, self.mic_channels = self.get_index('ReSpeaker 4 Mic Array (UAC1.0) ')
+        # self.mic_index, self.mic_channels = self.get_index('ReSpeaker 4 Mic Array (UAC1.0) ')
         self.mic_name = 'ReSpeaker 4 Mic Array (UAC1.0) '
         self.speak_path = "../_exp/Speaker_Sound/2_up_tsp_1num.wav"
         self.recode_second = 1.2
@@ -21,6 +23,9 @@ class Estimate(RecodeFunc):
         self.smooth_step = 50
         self.mic_id = 0
         self.model = joblib.load('../../../../OneDrive/Research/Model/191125_anechonic/anechonic_svr_model.pkl')
+        self.scon = StageControl()
+        self.scon.calibrate()
+        self.check_ready(200)
 
     def estimate(self):
         input_file = self.mic_path + 'test.wav'
@@ -44,16 +49,36 @@ class Estimate(RecodeFunc):
         # plt.figure()
         # plt.plot(data_set[self.mic_id, :])
         # plt.show()
-        print(data_set[self.mic_id].shape)
-        print(self.model.predict(data_set[:, -1385:]))  # なんかしらんけど、サンプル数が１個以上いるみたいなので、マイクデータをそのまま上げてみた
-
+        # print(data_set[self.mic_id].shape)
+        print(self.model.predict(data_set[:, 256:]))
 
     @staticmethod
     def freq_ids(freq_list, freq):
         freq_id = np.abs(freq_list - freq).argmin()
         return freq_id
 
+    def turn_table(self, direction):
+        self.scon.move_table(direction + 50)
+        self.check_ready(200)
+        time.sleep(2)
+        print("move to ", direction)
+
+    def check_ready(self, wait_count):
+        count_num = 0
+        print("Now Moving ...")
+        while count_num < wait_count:
+            count_num += 1
+            if not self.scon.isReady():
+                while True:
+                    count_num += 1
+                    if self.scon.isReady():
+                        break
+        print("Ready")
+
 
 if __name__ == '__main__':
     es = Estimate()
-    es.estimate()
+    DIRECTIONS = [0, 10, 20, 30]
+    for i in DIRECTIONS:
+        es.turn_table(i)
+        es.estimate()

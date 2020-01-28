@@ -4,7 +4,7 @@ import wave
 import sys
 import os
 import numpy as np
-from _function import MyFunc
+# from _function import MyFunc
 # from msvcrt import getch  # Windowsでは使えるらしい
 
 
@@ -133,7 +133,7 @@ class RecodeFunc:
                     stream2.write(out_data)
                     out_data = wf.readframes(CHUNK)
             recoded_data = b''.join(recoding_data)
-            print(type(recoded_data))
+            # print(type(recoded_data))
             self.wave_save(recoded_data, channels=channels, sampling=sampling, wave_file=input_file_name)
 
             stream1.stop_stream()
@@ -147,8 +147,34 @@ class RecodeFunc:
                     .reshape((channels, -1), order='F')
                 return recoded_input_data, sampling
 
+    @staticmethod
+    def wave_read_func(wave_path):
+        with wave.open(wave_path, 'r') as wave_file:
+            w_channel = wave_file.getnchannels()
+            w_sanpling_rate = wave_file.getframerate()
+            w_frames_num = wave_file.getnframes()
+            w_sample_width = wave_file.getsampwidth()
+
+            data = wave_file.readframes(w_frames_num)
+            if w_sample_width == 2:
+                data = np.frombuffer(data, dtype='int16').reshape((w_frames_num, w_channel)).T
+            elif w_sample_width == 4:
+                data = np.frombuffer(data, dtype='int32').reshape((w_frames_num, w_channel)).T
+
+            '''
+            print('*****************************')
+            print('Read wave file:', wave_path)
+            print('Mic channel num:', w_channel)
+            print('Sampling rate:', w_sanpling_rate)
+            print('Frame_num:', w_frames_num, ' time:', w_frames_num / float(w_sanpling_rate))
+            print('sound data shape:', data.shape)
+            print('*****************************')
+            '''
+
+            return data, w_channel, w_sanpling_rate, w_frames_num
+
 
 if __name__ == '__main__':
     rec = RecodeFunc()
-    FILE = "./origin_sound_data/tsp_1num.wav"
+    FILE = "../_exp/Speaker_Sound/2_up_tsp_1num.wav"
     rec.sound_out(FILE)
