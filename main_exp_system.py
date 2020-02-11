@@ -6,12 +6,14 @@ from transitions import Machine
 from _turntable_controler import StageControl
 from _recode_func import RecodeFunc
 from multiprocessing import Pool
+from _function import MyFunc
 
 
-class StateMachine(object):
+class StateMachine(MyFunc):
     states = ['Turn', 'Recode', 'Wait', 'Init', 'Next']
 
     def __init__(self, name):
+        super().__init__()
         self.name = name
         self.machine = Machine(model=self, states=StateMachine.states, initial='Wait', auto_transitions=False)
         self.machine.add_transition(trigger='Turn_start', source='Init', dest='Turn', after='turn_table')
@@ -26,10 +28,12 @@ class StateMachine(object):
         self.mic_index, self.mic_channels = self.rfnc.get_index('ReSpeaker 4 Mic Array (UAC1.0) ')
         # self.speak_wf, self.speak_stream, self.speak_p = self.rfnc.sound_read("./origin_sound_data/tsp_1num.wav")
         # self.speak_path = "../_exp/Speaker_Sound/1_plus005_4time.wav"
-        self.speak_path = "../_exp/Speaker_Sound/2_up_tsp_8num.wav"
-        self.mic_path = '../_exp/19' + datetime.today().strftime("%m%d") + '/recode_data/' + \
-                        datetime.today().strftime("%H%M%S")
+        self.speak_path = self.speaker_sound_path + "torn_1s_1000Hz.wav"
+        self.mic_path = '../_exp/20' + datetime.today().strftime("%m%d") + '/' + datetime.today().strftime("%H%M%S") + '/'
+        self.my_makedirs(self.mic_path)
         self.adjust = 50
+        self.recode_second = 1.3
+        self.mic_name = 'ReSpeaker 4 Mic Array (UAC1.0)'
 
     def turn_table(self, name):
         print(name-self.adjust, "Setting ... ")
@@ -44,15 +48,20 @@ class StateMachine(object):
     def recode(self, name, num=0):
         # print("recode", name)
         # recode_sound = 20.5
-        recode_sound = 8.5
-        pool = Pool(4)
-        if num == 0:
-            pool.apply_async(self.rfnc.sound_recode,
-                             (self.mic_path + "/", name, recode_sound, self.mic_channels, self.mic_index))
-        else:
-            pool.apply_async(self.rfnc.sound_recode,
-                             (self.mic_path + "_" + str(num) + "/", name, recode_sound, self.mic_channels, self.mic_index))
-        self.rfnc.sound_out(self.speak_path)
+        # recode_sound = 1.2
+        # pool = Pool(4)
+        output_name = self.mic_path + str(name) + '.wav'
+        recode_data, sampling = self.rfnc.play_rec(self.speak_path, self.recode_second, device_name=self.mic_name,
+                                                   input_file_name=output_name, need_data=True,
+                                                   order_index=self.mic_index, order_ch=self.mic_channels)
+        #
+        # if num == 0:
+        #     pool.apply_async(self.rfnc.sound_recode,
+        #                      (self.mic_path + "/", name, recode_sound, self.mic_channels, self.mic_index))
+        # else:
+        #     pool.apply_async(self.rfnc.sound_recode,
+        #                      (self.mic_path + "_" + str(num) + "/", name, recode_sound, self.mic_channels, self.mic_index))
+        # self.rfnc.sound_out(self.speak_path)
 
     def init(self):
         if self.scon.ser is None:
@@ -61,7 +70,7 @@ class StateMachine(object):
 
     def check_ready(self, wait_count):
         count_num = 0
-        print("Now Moving ...")
+        # print("Now Moving ...")
         while count_num < wait_count:
             count_num += 1
             if not self.scon.isReady():
@@ -69,12 +78,12 @@ class StateMachine(object):
                     count_num += 1
                     if self.scon.isReady():
                         break
-        print("Ready")
+        # print("Ready")
 
     def main(self, DIRECTIONS, num=0):
         self.Init_set()
         self.check_ready(200)
-        time.sleep(30)
+        # time.sleep(30)
         print("Finish Calibration of Turn Table")
         print("#################################################")
         self.Turn_start(DIRECTIONS[0] + self.adjust)
@@ -83,10 +92,10 @@ class StateMachine(object):
             time.sleep(2)
             self.Turn_fin(deg, num)
             self.Rec_fin()
-            print("******************************************")
+            # print("******************************************")
             if i + 1 < len(DIRECTIONS):
                 self.Turn_res(DIRECTIONS[i + 1] + self.adjust)
-                print("OK")
+                # print("OK")
 
         self.scon.move_table(0 + self.adjust)
 
@@ -105,8 +114,8 @@ if __name__ == '__main__':
     st = StateMachine("State")
     # repeat_num = 10
     order = [50, 40, 30, 20, 10, 0, -10, -20, -30, -40]
-    # order = [10, 0]
     DIRECTIONS = st.make_dir(order)
+    # DIRECTIONS = [10, 0]
     # print(np.array(DIRECTIONS).reshape(1, -1)[0])
     # for i in range(repeat_num):
     st.main(DIRECTIONS)

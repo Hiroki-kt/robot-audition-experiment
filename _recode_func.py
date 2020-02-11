@@ -92,11 +92,15 @@ class RecodeFunc:
         data = wf.readframes(chunk)
 
     def play_rec(self, out_file_name, recode_second, device_name='ReSpeaker 4 Mic Array (UAC1.0)',
-                 CHUNK=1024, input_file_name='./test_out.wav', need_data=False):
+                 CHUNK=1024, input_file_name='./test_out.wav', need_data=False, order_index=None, order_ch=None):
         # file_name = '../_exp/Speaker_Sound/up_tsp_1num.wav'
         wf = wave.open(out_file_name, 'rb')
         sampling = wf.getframerate()
-        index, channels = self.get_index(device_name)
+        if order_index is not None:
+            index = order_index
+            channels = order_ch
+        else:
+            index, channels = self.get_index(device_name)
         p = pyaudio.PyAudio()
 
         stream1 = p.open(format=pyaudio.paInt16,
@@ -115,7 +119,7 @@ class RecodeFunc:
                          )
 
         if sampling * recode_second < wf.getnframes():
-            print('Error recode time is not enough')
+            print('Error recode time is not enough', wf.getnframes()/sampling)
             sys.exit()
 
         elif sampling * recode_second > wf.getnframes() * 2:
@@ -142,7 +146,7 @@ class RecodeFunc:
             stream2.close()
             p.terminate()
             if need_data:
-                print('use data return data', np.frombuffer(np.array(recoding_data), dtype='int16').shape)
+                # print('use data return data', np.frombuffer(np.array(recoding_data), dtype='int16').shape)
                 recoded_input_data = np.array(np.frombuffer(np.array(recoding_data), dtype='int16'))\
                     .reshape((channels, -1), order='F')
                 return recoded_input_data, sampling

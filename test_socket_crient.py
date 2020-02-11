@@ -2,7 +2,7 @@ import socket
 import time
 from datetime import datetime
 
-HOST_IP = "163.221.139.121"  # 接続するサーバーのIPアドレス
+HOST_IP = "163.221.44.237"  # 接続するサーバーのIPアドレス
 PORT = 12345  # 接続するサーバーのポート
 DATE_SIZE = 1024  # 受信データバイト数
 INTERVAL = 3  # ソケット接続時のリトライ待ち時間

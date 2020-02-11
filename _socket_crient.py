@@ -1,16 +1,18 @@
 import socket
 import time
 from datetime import datetime
-from _recode_func import RecodeFunc
+import wave
+# from _recode_func import RecodeFunc
 
-HOST_IP = "163.221.139.121"  # 接続するサーバーのIPアドレス
+HOST_IP = "163.221.139.120"  # 接続するサーバーのIPアドレス
+# HOST_IP = '163.221.126.64'
 PORT = 12345  # 接続するサーバーのポート
 DATE_SIZE = 1024  # 受信データバイト数
 INTERVAL = 3  # ソケット接続時のリトライ待ち時間
 RETRY_TIMES = 5  # ソケット接続時のリトライ回数
 
 
-class SocketClient(RecodeFunc):
+class SocketClient:
     def __init__(self, host, port, data_size, interval, retry_times):
         self.host = host
         self.port = port
@@ -74,3 +76,11 @@ class SocketClient(RecodeFunc):
         self.socket.close()  # ソケットクローズ
         self.socket = None
 
+    @staticmethod
+    def wave_save(data, channels=1, width=2, sampling=44100, wave_file='./out_put.wav'):
+        wf = wave.Wave_write(wave_file)
+        wf.setnchannels(channels)
+        wf.setsampwidth(width)
+        wf.setframerate(sampling)
+        wf.writeframes(data)
+        wf.close()

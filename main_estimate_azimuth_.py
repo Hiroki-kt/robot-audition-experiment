@@ -78,7 +78,7 @@ class Estimate(RecodeFunc):
 
 if __name__ == '__main__':
     es = Estimate()
-    DIRECTIONS = [0, 10, 20, 30]
+    DIRECTIONS = [0]
     for i in DIRECTIONS:
         es.turn_table(i)
         es.estimate()
