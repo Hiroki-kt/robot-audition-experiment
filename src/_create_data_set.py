@@ -1,6 +1,5 @@
 import numpy as np
 from _function import MyFunc
-# from _tf_generate_tsp import TSP
 from scipy import stats
 from configparser import ConfigParser
 from distutils.util import strtobool
@@ -257,6 +256,6 @@ class CreateDataSet(MyFunc):
 
 
 if __name__ == '__main__':
-    config_ini = './config_200210_PTs09_kuka_distance_400.ini'
+    config_ini = '../config/config_191205_PTs05.ini'
     cd = CreateDataSet(config_ini)
     cd()

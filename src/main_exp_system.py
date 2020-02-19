@@ -12,7 +12,7 @@ from _function import MyFunc
 class StateMachine(MyFunc):
     states = ['Turn', 'Recode', 'Wait', 'Init', 'Next']
 
-    def __init__(self, name):
+    def __init__(self, name, out_file, recode_second):
         super().__init__()
         self.name = name
         self.machine = Machine(model=self, states=StateMachine.states, initial='Wait', auto_transitions=False)
@@ -27,12 +27,12 @@ class StateMachine(MyFunc):
         self.rfnc = RecodeFunc()
         self.mic_index, self.mic_channels = self.rfnc.get_index('ReSpeaker 4 Mic Array (UAC1.0) ')
         # self.speak_wf, self.speak_stream, self.speak_p = self.rfnc.sound_read("./origin_sound_data/tsp_1num.wav")
-        # self.speak_path = "../_exp/Speaker_Sound/1_plus005_4time.wav"
-        self.speak_path = self.speaker_sound_path + "torn_1s_1000Hz.wav"
+        # self.speak_path = "../_exp/Speaker_Sound/1_plus005_4time.wav
+        self.speak_path = self.speaker_sound_path + out_file
         self.mic_path = '../_exp/20' + datetime.today().strftime("%m%d") + '/' + datetime.today().strftime("%H%M%S") + '/'
         self.my_makedirs(self.mic_path)
         self.adjust = 50
-        self.recode_second = 1.3
+        self.recode_second = recode_second
         self.mic_name = 'ReSpeaker 4 Mic Array (UAC1.0)'
 
     def turn_table(self, name):
@@ -83,7 +83,8 @@ class StateMachine(MyFunc):
     def main(self, DIRECTIONS, num=0):
         self.Init_set()
         self.check_ready(200)
-        # time.sleep(30)
+        if len(DIRECTIONS) > 3:
+            time.sleep(10)
         print("Finish Calibration of Turn Table")
         print("#################################################")
         self.Turn_start(DIRECTIONS[0] + self.adjust)
@@ -98,26 +99,37 @@ class StateMachine(MyFunc):
                 # print("OK")
 
         self.scon.move_table(0 + self.adjust)
+        self.scon.ser.close()
+        print("serial connection closed")
 
     @staticmethod
     def make_dir(order):
         DIRECTIONS = [order]
-        for i in range(10):
+        for i in range(4):
             order = [k - 1 for k in order]
             DIRECTIONS.append(order)
         DIRECTIONS = np.array(DIRECTIONS).reshape(1, -1)[0]
+        DIRECTIONS = np.append(DIRECTIONS, -50)
         # print(np.array(DIRECTIONS).reshape(1, -1)[0])
         return DIRECTIONS
 
 
 if __name__ == '__main__':
-    st = StateMachine("State")
-    # repeat_num = 10
-    order = [50, 40, 30, 20, 10, 0, -10, -20, -30, -40]
-    DIRECTIONS = st.make_dir(order)
-    # DIRECTIONS = [10, 0]
-    # print(np.array(DIRECTIONS).reshape(1, -1)[0])
-    # for i in range(repeat_num):
-    st.main(DIRECTIONS)
+    out_file = ['2_up_tsp_8num', 'torn_8num_3000Hz']
+    second = [8.5, 9.0]
+    # freq = [1000, 2000, 3000]
+    for i, out in enumerate(out_file):
+        st = StateMachine("State", out + '.wav', second[i])
+        # repeat_num = 10
+        DIRECTIONS = [50, 40, 30, 20, 10, 0]
+        # order = np.arange(-45, 51, 5)
+        # DIRECTIONS = st.make_dir(order)
+        # DIRECTIONS = [-30, 0]
+        # DIRECTIONS = np.arange(-4, 46, 5)
+        # DIRECTIONS = np.append(DIRECTIONS, -50)
+        print(DIRECTIONS)
+        # print(np.array(DIRECTIONS).reshape(1, -1)[0])
+        # for i in range(repeat_num):
+        st.main(DIRECTIONS)
 
 

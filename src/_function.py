@@ -6,11 +6,15 @@ import math
 import wave
 from datetime import datetime
 from scipy import signal
+from configparser import ConfigParser
 
 
 class MyFunc:
-    def __init__(self):
-        self.onedrive_path = '../../../../OneDrive/Research/'
+    def __init__(self, pc_config='../config/pc_config.ini'):
+        config = ConfigParser()
+        config.read(pc_config)
+        # self.onedrive_path = 'C:/Users/robotics/OneDrive/Research/'
+        self.onedrive_path = config['Path']['OneDrive']
         self.recode_data_path = self.onedrive_path + 'Recode_Data/'
         self.speaker_sound_path = self.onedrive_path + 'Speaker_Sound/'
 
@@ -45,14 +49,16 @@ class MyFunc:
         if not os.path.isdir(path):
             os.makedirs(path)
 
-    def make_dir_path(self, array=False, img=False, exp=False):
-        path = '/20' + datetime.today().strftime("%m%d") + '/'
+    def make_dir_path(self, array=False, img=False, exp=False, photo=False, directory_name='/'):
+        path = '/20' + datetime.today().strftime("%m%d") + directory_name
         if array:
             path = '../../_array' + path
         elif img:
             path = '../../_img' + path
         elif exp:
             path = '../../_exp' + path
+        elif photo:
+            path = '../../_photo' + path
 
         # print(path)
         self.my_makedirs(path)
@@ -135,33 +141,18 @@ class MyFunc:
         wf.close()
         print('saved', wave_file)
 
-    def make_dir_path(self, array=False, img=False, exp=False, photo=False):
-        path = '/20' + datetime.today().strftime("%m%d") + '/'
-        if array:
-            path = '../_array' + path
-        elif img:
-            path = '../_img' + path
-        elif exp:
-            path = '../_exp' + path
-        elif photo:
-            path = '../_photo' + path
-
-        # print(path)
-        self.my_makedirs(path)
-        return path
-
     @staticmethod
-    def zero_cross(data, step, sampling, size, need_frames, up=False):
+    def zero_cross(data, step, sampling, size, need_frames, up=False, torn=False):
         start = 0
         count = 0
         zero_cross = []
         frame_list = []
         time_list = []
-        while count < need_frames /step:
+        while count < need_frames / step:
             sign = np.diff(np.sign(data[:, start: start + size]))
             zero_cross.append(np.where(sign)[1].shape[0])
             frame_list.append(start)
-            time_list.append(start/sampling)
+            time_list.append(start / sampling)
             start = start + step
             count += 1
         # plt.figure()
@@ -172,11 +163,36 @@ class MyFunc:
             peak = signal.argrelmax(np.array(zero_cross), order=5)
             # print(peak)
             time_id = peak[0][np.argmax(np.array(zero_cross)[peak])]
+            START_TIME = frame_list[int(time_id)] - need_frames
+            return START_TIME
+        elif torn:
+            diff_list = np.abs(np.diff(zero_cross))
+            t_count = 0
+            # print(diff_list)
+            for i, diff in enumerate(diff_list):
+                # print(abs(diff - diff_list[i-1]))
+                # print('count', t_count)
+                if abs(diff - diff_list[i - 1]) < 5:
+                    t_count += 1
+                    if t_count > 10:
+                        print('Start time?', time_list[i - 10])
+                        print('Start frame?', frame_list[i - 10])
+                        return frame_list[i - 10]
+                else:
+                    t_count = 0
         else:
             peak = signal.argrelmax(np.array(zero_cross), order=10)
             time_id = peak[0][np.argmax(np.array(zero_cross)[peak])]
-        START_TIME = frame_list[int(time_id)] - need_frames
-        return START_TIME
+            START_TIME = frame_list[int(time_id)]
+            return START_TIME
+
+    @staticmethod
+    def torn_get_start_time(data, step, size, need_frames):
+        start = 0
+        count = 0
+        set_list = []
+        # while count < need_frames/step:
+        #     unipue_array = len(set(data[].tolist()))
 
     @staticmethod
     def data_search(date, sound_kind, geometric, app, plane_wave=True, calibration=False):

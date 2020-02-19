@@ -22,7 +22,7 @@ class Estimate(RecodeFunc):
         self.freq_max = 2200
         self.smooth_step = 50
         self.mic_id = 0
-        self.model = joblib.load('../../../../OneDrive/Research/Model/191125_anechonic/anechonic_svr_model.pkl')
+        self.model = joblib.load('../../../../OneDrive/Research/_array/200212/svm_200210_PTs09_freq_1000_8000.pkl')
         self.scon = StageControl()
         self.scon.calibrate()
         self.check_ready(200)
@@ -78,7 +78,7 @@ class Estimate(RecodeFunc):
 
 if __name__ == '__main__':
     es = Estimate()
-    DIRECTIONS = [0]
+    DIRECTIONS = [30]
     for i in DIRECTIONS:
         es.turn_table(i)
         es.estimate()
