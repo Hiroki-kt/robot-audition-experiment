@@ -54,20 +54,22 @@ class DataCombine(MyFunc):
         else:
             print("Error")
             sys.exit()
+        print(data_set.shape)
         return data_set
 
 
 if __name__ == '__main__':
     dc = DataCombine()
-    date = ['200128_PTs07', '200210_PTs09']
-    distance_list = [200, 300, 400]
-    data_path = 'C:/Users/robotics/OneDrive/Research/_array/200216/'
-    name = 'kuka_freq_1000_7000'
+    date = ['200214_PTs10']
+    distance_list = [0]
+    data_path = 'C:/Users/robotics/OneDrive/Research/_array/200225/'
+    name = '200214_PTs10_mic_combine'
     file_list = []
     for y, d in enumerate(date):
         for x, distance in enumerate(distance_list):
-            file_list.append(data_path + d + '_kuka_distance_' + str(distance) + '.npy')
+            # file_list.append(data_path + d + '_kuka_distance_' + str(distance) + '.npy')
+            file_list.append(data_path + d + '.npy')
             print(file_list[x])
     combine_data = dc.load_data(file_list)
-    m_data = dc.select_element(combine_data, 12)
+    m_data = dc.select_element(combine_data, 1)
     dc.save_array(m_data, name)

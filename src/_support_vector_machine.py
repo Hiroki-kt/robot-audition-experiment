@@ -14,6 +14,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
 import pandas as pd
+import itertools
 
 
 class ExecuteSVR(MyFunc):
@@ -25,7 +26,8 @@ class ExecuteSVR(MyFunc):
                  use_model=None,
                  output='test',
                  label_min=-45,
-                 label_max=45):
+                 label_max=45,
+                 mic=False):
         super().__init__()
 
         self.data_set = np.load(data_set)
@@ -36,8 +38,9 @@ class ExecuteSVR(MyFunc):
 
         if len(self.data_set.shape) == 4:
             self.x, self.x_test, self.y, self.y_test = self.split_train_test(use_mic_id, use_test_num, label_list)
-        elif len(self.data_set.shape) == 2:
-            self.x, self.x_test, self.y, self.y_test = self.split(use_mic_id, use_test_num, label_list)
+
+        elif len(self.data_set.shape) <= 3:
+            self.x, self.x_test, self.y, self.y_test = self.split(label_list)
         
         if use_model is None:
             model = self.svm(output + '.pkl')
@@ -45,7 +48,18 @@ class ExecuteSVR(MyFunc):
             model = joblib.load(use_model)
         self.model_check(model, label_list)
 
-    def split(self, mic, test_num, label_list):
+    def split_use_mic(self, label_list):
+        if self.data_set.shape[0] % len(self.DIRECTIONS) != 0:
+            print("Error")
+            sys.exit()
+
+        labeling_directions = self.labeling(label_list)
+        Y = np.array(labeling_directions.tolist() * int(self.data_set.shape[0]/len(self.DIRECTIONS)))
+        x, x_test, y, y_test = train_test_split(self.data_set, Y, train_size=0.8)
+        print('### Test & Traing data shape: ', x.shape, y.shape, x_test.shape, y_test.shape)
+        return x, x_test, y, y_test
+
+    def split(self, label_list):
         if self.data_set.shape[0] % len(self.DIRECTIONS) != 0:
             print("Error")
             sys.exit()
@@ -68,7 +82,7 @@ class ExecuteSVR(MyFunc):
         y_test = np.array(labeling_directions.tolist() * int(test_num))
         print('### Test & Traing data shape: ', x.shape, y.shape, x_test.shape, y_test.shape)
         return x, x_test, y, y_test
-    
+
     def labeling(self, label_list):
         if len(self.DIRECTIONS) % len(label_list) != 0:
             print('Error con not split label, Now directions is :', self.DIRECTIONS.shape)
@@ -135,12 +149,14 @@ class ExecuteSVR(MyFunc):
     def model_check(self, model, label_list):
         cm = confusion_matrix(self.y_test, model.predict(self.x_test))
         label = self.labeling(label_list)
-        fig, ax = plt.subplots(figsize=(6, 6))
         df = pd.DataFrame(data=cm, index=label_list, columns=label_list)
-        df = df.pivot('True', 'Estimated')
-        sns.heatmap(df, annot=True, cmap='Blues', fmt="d", linewidths=.5, ax=ax, square=True)
-        ax.set_ylim(len(df), 0)
-        fig.show()
+        # df = df.pivot('True', 'Estimated')
+        # sns.heatmap(cm, annot=True, cmap='Blues')
+        # ax.set_ylim(len(df), 0)
+
+        plt.figure(figsize=(5, 5))
+        cm = self.plot_confusion_matrix(cm, classes=label_list, normalize=True)
+        plt.show()
 
         print('### Accuracy rate', accuracy_score(self.y_test, model.predict(self.x_test)))
         print("### R2 score", model.score(self.x_test, self.y_test))
@@ -153,19 +169,51 @@ class ExecuteSVR(MyFunc):
         print(test_num)
         print(np.average(model.predict(self.x[test_num + 49:test_num + 52])))
 
+    @staticmethod
+    def plot_confusion_matrix(cm, classes,
+                              normalize=False,
+                              title='Confusion matrix',
+                              cmap='Blues'):
+        if normalize:
+            cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+            print("Normalized confusion matrix")
+        else:
+            print('Confusion matrix, without normalization')
+
+        print(cm)
+
+        plt.imshow(cm, interpolation='nearest', cmap=cmap)
+        # plt.title(title)
+        # plt.colorbar()
+        # tick_marks = np.arange(len(classes))
+        # plt.xticks(tick_marks, classes)
+        # plt.yticks(tick_marks, classes)
+
+        fmt = '.2f' if normalize else 'd'
+        thresh = cm.max() / 2.
+        for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+            plt.text(j, i, format(cm[i, j], fmt),
+                     horizontalalignment="center",
+                     color="white" if cm[i, j] > thresh else "black")
+
+        plt.ylabel('True label')
+        plt.xlabel('Predicted label')
+        plt.tight_layout()
+        return cm
+
 
 if __name__ == '__main__':
     onedrive_path = 'C:/Users/robotics/OneDrive/Research/'
-    data_set_file_path = onedrive_path + '_array/200216/'
-    config_path = '../config_'
-    model_file = onedrive_path + '_array/200216/svm_kuka_freq_1000_7000.pkl'
+    data_set_file_path = onedrive_path + '_array/200222/'
+    model_file = onedrive_path + '_array/200221/svm_01_200210_PTs09_kuka_distance_200_mic.pkl'
     
-    data_name = 'kuka_freq_1000_7000'
+    data_name = '200210_PTs09_kuka_distance_200_mic_combine'
 
     data_set_file = data_set_file_path + data_name + '.npy'
-    output_file = 'svm_' + data_name
+    output_file = 'svm_01_mic' + data_name
     
-    LABEL = np.arange(-40, 41, 10)
+    # LABEL = np.arange(-40, 41, 10)
+    LABEL = [0, 1]
     print(LABEL)
     
     # else select 0 ~ 8, you can make data set using id's mic
@@ -174,5 +222,6 @@ if __name__ == '__main__':
                     LABEL,
                     use_mic_id=0,
                     use_test_num=2,
-                    use_model=model_file,
-                    output=output_file,)
+                    # use_model=model_file,
+                    output=output_file,
+                    mic=True)

@@ -160,11 +160,11 @@ class MyFunc:
         # plt.ylim(0, 1000)
         # plt.show()
         if up:
-            peak = signal.argrelmax(np.array(zero_cross), order=5)
+            peak = signal.argrelmax(np.array(zero_cross), order=10)
             # print(peak)
             time_id = peak[0][np.argmax(np.array(zero_cross)[peak])]
-            START_TIME = frame_list[int(time_id)] - need_frames
-            return START_TIME
+            START_TIME = frame_list[int(time_id)] - need_frames * 0.8
+            return int(START_TIME)
         elif torn:
             diff_list = np.abs(np.diff(zero_cross))
             t_count = 0
@@ -218,3 +218,8 @@ class MyFunc:
     def freq_ids(freq_list, freq):
         freq_id = np.abs(freq_list - freq).argmin()
         return freq_id
+
+    def get_frames(self, wave_path):
+        with wave.open(wave_path, 'r') as wave_file:
+            w_frames_num = wave_file.getnframes()
+            return w_frames_num

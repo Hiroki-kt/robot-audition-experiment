@@ -93,7 +93,7 @@ class ExecuteSVR(MyFunc):
         print()
         print("*** Now fitting ...  ***")
         print()
-        params_cnt = 5
+        params_cnt = 20
         params = {"C": np.logspace(0, 2, params_cnt), "epsilon": np.logspace(-1, 1, params_cnt)}
         gridsearch = GridSearchCV(SVR(), params, cv=self.gen_cv(), scoring="r2", return_train_score=True)
         gridsearch.fit(self.x, self.y)
@@ -134,15 +134,19 @@ class ExecuteSVR(MyFunc):
         img_path = self.make_dir_path(img=True)
         plt.savefig(img_path + self.output_name + '.png')
 
-        # plt.figure()
-        # plt.plot(self.DIRECTIONS, abs(model.predict(self.x_test[0:num]) - self.y_test[0:num]), 'o')
-        # plt.xlabel('True azimuth angle [deg]')
-        # plt.ylabel('Absolute value of error [deg]')
-        # plt.ylim(0, 40)
-        # # plt.legend()
-        # # plt.show()
-        # img_path = self.make_dir_path(img=True)
-        # plt.savefig(img_path + 'svr_error_' + self.data_name + '.png')
+        fig = plt.figure()
+        fig.subplots_adjust(bottom=0.2)
+        ax = fig.add_subplot(111)
+        ax.plot(self.DIRECTIONS, abs(model.predict(self.x_test[:num]) - self.y_test[:num]), lw=3)
+        # plt.plot(self.DIRECTIONS, y_data1[:num], label="True")
+        plt.xlabel('Azimuth angle [deg]', fontsize=15)
+        plt.ylabel('Error from true angle [deg]', fontsize=15)
+        plt.ylim(0, 20)
+        plt.tick_params(labelsize=15)
+        # plt.legend(fontsize=15)
+        # plt.show()
+        img_path = self.make_dir_path(img=True)
+        plt.savefig(img_path + self.output_name + '_error.png')
         
         # test_num = random.randint(-45, 45)
         # print()
@@ -189,7 +193,7 @@ class ExecuteSVR(MyFunc):
         plt.ylabel('Error from true angle [deg]', fontsize=15)
         plt.ylim(0, 20)
         plt.tick_params(labelsize=15)
-        plt.legend(fontsize=15)
+        # plt.legend(fontsize=15)
         # plt.show()
         img_path = self.make_dir_path(img=True)
         plt.savefig(img_path + self.output_name + '_error.png')
@@ -201,20 +205,20 @@ class ExecuteSVR(MyFunc):
 
 if __name__ == '__main__':
     onedrive_path = 'C:/Users/robotics/OneDrive/Research/'
-    data_set_file_path = onedrive_path + '_array/200212/'
-    model_file = onedrive_path + '_array/200215/svr_200210_PTs09_freq_1000_8000.pkl'
+    data_set_file_path = onedrive_path + '_array/200225/'
+    model_file = onedrive_path + '_array/200211/svr_200210_PTs09_kuka_distance_200.pkl'
 
-    data_name = '200210_PTs09_freq_1000_8000'
+    data_name = '200214_PTs10'
 
     data_set_file = data_set_file_path + data_name + '.npy'
-    output_file = 'svr_grid_' + data_name
+    output_file = 'svr_' + data_name
 
     es = ExecuteSVR(data_set_file,
                     use_mic_id=0,
                     use_test_num=2,
                     # use_model_file=model_file,
                     output_file_name=output_file,
-                    # label_max=45,
-                    # label_min=-45,
+                    label_max=45,
+                    label_min=-45,
                     # not_auto=True
                     )

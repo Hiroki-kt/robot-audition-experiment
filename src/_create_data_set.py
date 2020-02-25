@@ -112,7 +112,7 @@ class CreateDataSet(MyFunc):
                     sound_data = np.delete(sound_data, [0, 5], 0)
                 elif self.mic_name == 'Matrix':
                     sound_data = sound_data
-                start_time = self.zero_cross(sound_data, 128, sampling, 512, self.origin_frames, up=True)
+                start_time = self.zero_cross(sound_data, 128, sampling, 512, int(self.origin_frames), up=True)
                 if start_time < 0:
                     if real_num != self.data_num:
                         start_time = start_time + self.origin_frames
@@ -256,6 +256,6 @@ class CreateDataSet(MyFunc):
 
 
 if __name__ == '__main__':
-    config_ini = '../config/config_191205_PTs05.ini'
+    config_ini = '../config/config_200214_PTs10.ini'
     cd = CreateDataSet(config_ini)
     cd()

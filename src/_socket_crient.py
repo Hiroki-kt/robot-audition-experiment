@@ -2,6 +2,7 @@ import socket
 import time
 from datetime import datetime
 import wave
+import numpy as np
 # from _recode_func import RecodeFunc
 
 HOST_IP = "163.221.139.120"  # 接続するサーバーのIPアドレス
@@ -52,7 +53,7 @@ class SocketClient:
         self.send(in_data)
         return self.recv()
 
-    def send_GO(self, out_put_name):
+    def send_GO(self, out_put_name, return_data=False):
         in_data = 'go'
         in_data = in_data.encode('utf-8')
         # print(in_data)
@@ -69,8 +70,12 @@ class SocketClient:
             else:
                 recode_data.append(rcv_data)
         print('OK')
-        recode_data = b''.join(recode_data)
-        self.wave_save(recode_data, channels=8, wave_file=out_put_name)
+        byte_data = b''.join(recode_data)
+        self.wave_save(byte_data, channels=8, wave_file=out_put_name)
+        if return_data:
+            recoded_input_data = np.array(np.frombuffer(np.array(recode_data), dtype='int16')) \
+                .reshape((8, -1), order='F')
+            return recoded_input_data
 
     def close(self):
         self.socket.close()  # ソケットクローズ
