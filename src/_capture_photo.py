@@ -6,7 +6,7 @@ IMAGE_SHOW = False
 
 class TakePhoto:
     def __init__(self):
-        self.c270 = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+        self.c270 = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         if self.c270.isOpened() is False:
             raise Exception("IO Error")
         self.c270.set(cv2.CAP_PROP_FPS, 30)
@@ -41,7 +41,7 @@ class TakePhoto:
 if __name__ == '__main__':
     # angle patterns of the rotating stage
     photo = TakePhoto()
-    angle_pattern = range(0, 360, 10)  # [0,10,...,350]
+    angle_pattern = range(0, 11, 10)  # [0,10,...,350]
     for ang in angle_pattern:
         photo.capture(ang)
         # count = 0

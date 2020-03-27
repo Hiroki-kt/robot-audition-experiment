@@ -1,16 +1,16 @@
 # coding:utf-8
 import numpy as np
 import time
-from datetime import datetime
-from transitions import Machine
+# from datetime import datetime
+# from transitions import Machine
 from _turntable_controler import StageControl
 # from _recode_func import RecodeFunc
 # from multiprocessing import Pool
 # from _socket_multi_crient import SocketClient
 from _socket_crient import SocketClient
 from _function import MyFunc
-from _capture_photo import TakePhoto
-import sys
+# from _capture_photo import TakePhoto
+# import sys
 from scipy import stats
 import joblib
 from matplotlib import pyplot as plt
@@ -55,9 +55,9 @@ class Estimate(MyFunc):
         sound_data = recode_data[:, start_time: int(start_time + self.origin_frames)]
         # sound_data = np.reshape(sound_data, (8, 8, -1))
         print(sound_data.shape)
-        plt.figure()
-        plt.specgram(sound_data[0], Fs=44100)
-        plt.show()
+        # plt.figure()
+        # plt.specgram(sound_data[0], Fs=44100)
+        # plt.show()
         fft_data = np.fft.rfft(sound_data)
         print(fft_data.shape)
         data_set = np.zeros((recode_data.shape[0], len(self.freq_list)), dtype=np.float)
@@ -69,8 +69,13 @@ class Estimate(MyFunc):
             # normalize_data = (smooth_data - smooth_data.mean()) / smooth_data.std()
             # normalize_data = (smooth_data - min(smooth_data))/(max(smooth_data) - min(smooth_data))
             data_set[mic, :] = normalize_data
+        training_data = np.load(self.onedrive_path + '_array/200216/200210_PTs09_kuka_distance_200.npy')
+        print(training_data.shape)
+
         plt.figure()
-        plt.plot(data_set[0])
+        plt.plot(training_data[dir_name + 50, 0, 0, :], label='model')
+        plt.plot(data_set[0], label='measure')
+        plt.legend()
         plt.show()
         print(self.model.predict(data_set))
 
@@ -118,7 +123,8 @@ if __name__ == '__main__':
     # DIRECTIONS = st.make_dir(order)
     # st.main(DIRECTIONS, DISTANCES)
     '''for test'''
-    DIRECTIONS = [45]
+    DIRECTIONS = np.arange(-40, 41, 10)
+    print(DIRECTIONS)
     for i in DIRECTIONS:
         es.turn_table(i)
         es.estimate(i)

@@ -256,6 +256,6 @@ class CreateDataSet(MyFunc):
 
 
 if __name__ == '__main__':
-    config_ini = '../config/config_200214_PTs10.ini'
+    config_ini = '../config/config_191015_STs01.ini'
     cd = CreateDataSet(config_ini)
     cd()

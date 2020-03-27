@@ -160,10 +160,10 @@ class MyFunc:
         # plt.ylim(0, 1000)
         # plt.show()
         if up:
-            peak = signal.argrelmax(np.array(zero_cross), order=10)
+            peak = signal.argrelmax(np.array(zero_cross), order=5)
             # print(peak)
             time_id = peak[0][np.argmax(np.array(zero_cross)[peak])]
-            START_TIME = frame_list[int(time_id)] - need_frames * 0.8
+            START_TIME = frame_list[int(time_id)] - need_frames * 0.9
             return int(START_TIME)
         elif torn:
             diff_list = np.abs(np.diff(zero_cross))

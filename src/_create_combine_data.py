@@ -39,6 +39,14 @@ class DataCombine(MyFunc):
         print(data_set.shape)
         return data_set
 
+    def combine_mic_dis(self, file):
+        data = self.combine_mic(file)
+        data_set = np.empty((0, file.shape[3]))
+        for i in range(file.shape[2]):
+            data_set = np.append(data_set, data[:, i, :], axis=0)
+        print(data_set.shape)
+        return data_set
+
     def save_array(self, file, output):
         path = self.make_dir_path(array=True)
         np.save(path + output + '.npy', file)
@@ -51,6 +59,8 @@ class DataCombine(MyFunc):
             data_set = self.combine_distance(file)
         elif axis == 12:
             data_set = self.combine_dis_mic(file)
+        elif axis == 21:
+            data_set = self.combine_mic_dis(file)
         else:
             print("Error")
             sys.exit()
@@ -60,10 +70,10 @@ class DataCombine(MyFunc):
 
 if __name__ == '__main__':
     dc = DataCombine()
-    date = ['200214_PTs10']
+    date = ['200214_PTs10_freq_1000_7000']
     distance_list = [0]
-    data_path = 'C:/Users/robotics/OneDrive/Research/_array/200225/'
-    name = '200214_PTs10_mic_combine'
+    data_path = 'C:/Users/robotics/OneDrive/Research/_array/200226/'
+    name = '200214_PTs10_freq_mic_combine2'
     file_list = []
     for y, d in enumerate(date):
         for x, distance in enumerate(distance_list):
@@ -71,5 +81,5 @@ if __name__ == '__main__':
             file_list.append(data_path + d + '.npy')
             print(file_list[x])
     combine_data = dc.load_data(file_list)
-    m_data = dc.select_element(combine_data, 1)
+    m_data = dc.select_element(combine_data, 21)
     dc.save_array(m_data, name)
